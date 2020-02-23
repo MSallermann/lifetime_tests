@@ -2,23 +2,17 @@ import sys
 import numpy as np
 sys.path.insert(0, "../spirit/core/python")
 
-input_cfg = "input_sk.cfg"
+input_cfg = "input_cube.cfg"
 
 from spirit import chain, state, htst, configuration, io, constants, simulation, system, geometry
 from spirit.parameters import llg
 
 with state.State(input_cfg, quiet = False) as p_state:
 
-    configuration.plus_z(p_state)
-
-
-    chain.image_to_clipboard(p_state)
-    chain.set_length(p_state, 2)
-
-    io.image_read(p_state, "skyrmion_sp.ovf", idx_image_inchain=1)
+    io.chain_read(p_state, "cube_chain.ovf")
     io.chain_write(p_state, "chain_htst_initial.ovf")
     
-    htst.calculate(p_state, 0, 1, n_eigenmodes_keep = 10)
+    htst.calculate(p_state, 0, 1, n_eigenmodes_keep = 0)
     temperature_exponent, me, Omega_0, s, volume_min, volume_sp, prefactor_dynamical, prefactor = htst.get_info(p_state)
 
     chain.update_data(p_state)
