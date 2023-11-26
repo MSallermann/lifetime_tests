@@ -2,9 +2,13 @@ import numpy as np
 from pathlib import Path
 from scipy.optimize import curve_fit
 
-TRAJECTORY_FOLDER = Path("/home/moritz/Thesis_Code/lifetime_test/single/trajectories")
+TRAJECTORY_FOLDER = Path(
+    "/home/moritz/Thesis_Code/lifetime_tests/single/trajectories_2"
+)
 
-TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
+# TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
+TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:]
+
 # TEMPERATURE_LIST = [3.0]
 
 DAMPING_LIST = [0.3]
@@ -22,6 +26,8 @@ for temperature in TEMPERATURE_LIST:
         temp_folder = (
             TRAJECTORY_FOLDER / f"damping_{damping:.3f}_temperature_{temperature:.3f}"
         )
+
+        print(temperature, damping)
 
         list_of_trajectories = list(temp_folder.glob("trajectory_*"))
         n_trajectories = len(list_of_trajectories)
@@ -79,27 +85,21 @@ for temperature in TEMPERATURE_LIST:
             y = f * (1.0 + np.exp(-b * (x - a))) ** (-1) + c
             return y
 
-        a0 = (order_param[-1] + order_param[0]) / 2
-        b0 = (
-            4
-            * (mean_passage_times[-1] - mean_passage_times[0])
-            / (order_param[-1] - order_param[0])
-        )
-        c0 = (mean_passage_times[-1] + mean_passage_times[0]) / 2
-        f0 = 1
+        x = order_param
+        y = mean_passage_times
+
+        a0 = (x[-1] + x[0]) / 2
+        f0 = y[-1] - y[0]
+        b0 = 4 * (y[-1] - y[0]) / (x[-1] - x[0]) / f0
+        c0 = -(y[-1] + y[0]) / 8
         p0 = [a0, b0, c0, f0]
 
-        # popt, pcov = curve_fit(
-        #     sigmoid, order_param, mean_passage_times, p0=p0, method="lm"
-        # )
+        popt, pcov = curve_fit(sigmoid, x, y, p0=p0, method="lm")
+        inflection_point = popt[0]  # x = a
+        lifetime = sigmoid(inflection_point, *p0)
 
-        # inflection_point = popt[0]  # x = a
-        # lifetime = sigmoid(inflection_point, *popt)
-
-        # print(f" lifetime = {lifetime}")
-
-        # with open(temp_folder / "lifetime.txt", "w") as f:
-        #     print(lifetime, file=f)
+        with open(temp_folder / "lifetime.txt", "w") as f:
+            print(lifetime, file=f)
 
         # We save teh mean passage times in the same folder we have the trajectories
         np.savetxt(

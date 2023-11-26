@@ -9,12 +9,16 @@ def sigmoid(x, a, b, c, f):
     return y
 
 
+# TRAJECTORY_FOLDER = Path(
+#     "/home/moritz/Thesis_Code/lifetime_test/single/trajectories_run_one"
+# )
 TRAJECTORY_FOLDER = Path(
-    "/home/moritz/Thesis_Code/lifetime_test/single/trajectories_run_one"
+    "/home/moritz/Thesis_Code/lifetime_tests/single/trajectories_2"
 )
 
+
 TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
-TEMPERATURE_LIST = [6.2]
+TEMPERATURE_LIST = [1.00]
 
 DAMPING_LIST = [0.3]
 
@@ -46,18 +50,27 @@ for temperature in TEMPERATURE_LIST:
         y = mfpt_data[:, 1]
 
         a0 = (x[-1] + x[0]) / 2
-        b0 = 4 * (y[-1] - y[0]) / (x[-1] - x[0])
-        c0 = (y[-1] + y[0]) / 2
-        f0 = 1
+        f0 = y[-1] - y[0]
+        b0 = 4 * (y[-1] - y[0]) / (x[-1] - x[0]) / f0
+        c0 = -(y[-1] + y[0]) / 8
         p0 = [a0, b0, c0, f0]
 
         popt, pcov = curve_fit(
             sigmoid, mfpt_data[:, 0], mfpt_data[:, 1], p0=p0, method="lm"
         )
+
         inflection_point = popt[0]  # x = a
         lifetime = sigmoid(inflection_point, *popt)
         plt.axvline(inflection_point)
         plt.axhline(lifetime)
+
+        plt.plot(
+            mfpt_data[:, 0],
+            sigmoid(mfpt_data[:, 0], *p0),
+            color="red",
+            lw=2,
+            ls="-",
+        )
 
         plt.plot(
             mfpt_data[:, 0],
@@ -69,4 +82,5 @@ for temperature in TEMPERATURE_LIST:
 
         plt.xlabel("s_z")
         plt.ylabel("$\\tau$")
+        plt.savefig("sigmoid.png", dpi=300)
         plt.show()
