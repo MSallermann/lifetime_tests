@@ -80,9 +80,10 @@ for temperature in TEMPERATURE_LIST:
                         print(
                             f"Found event {n_switching}/{N_EVENTS} with lifetime {t} ps ( { int((t) / DT) } steps )"
                         )
-                        np.savetxt(
-                            trajectory_file,
-                            trajectory,
-                            header="t, sz, sy, sz",
-                        )
                         simulation.stop_all(p_state)
+
+            np.savetxt(
+                trajectory_file,
+                trajectory,
+                header="t, sz, sy, sz",
+            )
