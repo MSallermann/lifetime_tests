@@ -12,13 +12,11 @@ def sigmoid(x, a, b, c, f):
 # TRAJECTORY_FOLDER = Path(
 #     "/home/moritz/Thesis_Code/lifetime_test/single/trajectories_run_one"
 # )
-TRAJECTORY_FOLDER = Path(
-    "/home/moritz/Thesis_Code/lifetime_tests/single/trajectories_2"
-)
+TRAJECTORY_FOLDER = Path("/home/moritz/Thesis_Code/lifetime_tests/single/trajectories")
 
 
 TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
-TEMPERATURE_LIST = [1.00]
+TEMPERATURE_LIST = [2]
 
 DAMPING_LIST = [0.3]
 

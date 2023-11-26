@@ -2,14 +2,12 @@ import numpy as np
 from pathlib import Path
 from scipy.optimize import curve_fit
 
-TRAJECTORY_FOLDER = Path(
-    "/home/moritz/Thesis_Code/lifetime_tests/single/trajectories_2"
-)
+TRAJECTORY_FOLDER = Path("/home/moritz/Thesis_Code/lifetime_tests/single/trajectories")
 
 # TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
 TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:]
 
-# TEMPERATURE_LIST = [3.0]
+TEMPERATURE_LIST = [2.0]
 
 DAMPING_LIST = [0.3]
 
@@ -27,17 +25,16 @@ for temperature in TEMPERATURE_LIST:
             TRAJECTORY_FOLDER / f"damping_{damping:.3f}_temperature_{temperature:.3f}"
         )
 
-        print(temperature, damping)
-
         list_of_trajectories = list(temp_folder.glob("trajectory_*"))
         n_trajectories = len(list_of_trajectories)
 
         order_param_passage_times = np.zeros(shape=(n_trajectories, len(order_param)))
 
+        print("temperature = {:.3f}, damping = {:.3f}", temperature, damping)
         print(f"Processing {n_trajectories} trajectories\n")
 
         for idx_traj, traj_file in enumerate(list_of_trajectories):
-            # print(f"Processing {traj_file}")
+            print(f"file {traj_file}")
 
             data_current = np.loadtxt(traj_file)
 
