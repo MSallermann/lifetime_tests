@@ -9,10 +9,8 @@ def sigmoid(x, a, b, c, f):
     return y
 
 
-# TRAJECTORY_FOLDER = Path(
-#     "/home/moritz/Thesis_Code/lifetime_test/single/trajectories_run_one"
-# )
-TRAJECTORY_FOLDER = Path("/home/moritz/Thesis_Code/lifetime_tests/single/trajectories")
+THIS = Path(__file__).parent
+TRAJECTORY_FOLDER = THIS / "trajectories"
 
 
 TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
