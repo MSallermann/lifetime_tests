@@ -11,8 +11,8 @@ TRAJ_FOLDER = "trajectories_2"
 from spirit import state, io, simulation, system
 from spirit.parameters import llg
 
-TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:3]
-TEMPERATURE_LIST = [7.0]
+TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:]
+# TEMPERATURE_LIST = [7.0]
 
 DAMPING_LIST = [0.3]
 N_SHOT = 100
@@ -38,6 +38,8 @@ for temperature in TEMPERATURE_LIST:
             # If the file exists we skip
             if trajectory_file.exists():
                 continue
+            else:
+                np.savetxt(trajectory_file, [])
 
             # trajectory for this run
             trajectory = []
