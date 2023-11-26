@@ -11,7 +11,6 @@ with state.State(input_cfg, quiet = False) as p_state:
 
     configuration.plus_z(p_state)
 
-
     chain.image_to_clipboard(p_state)
     chain.set_length(p_state, 2)
 

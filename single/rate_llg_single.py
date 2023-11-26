@@ -11,12 +11,12 @@ DATA = (THIS / "data.txt").as_posix()
 from spirit import state, io, simulation, system
 from spirit.parameters import llg
 
-TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)[1:]
+TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:3]
 # TEMPERATURE_LIST = [3.0]
 
 DAMPING_LIST = [0.3]
-N_SHOT = 2
-DT = 0.5e-2
+N_SHOT = 100
+DT = 1e-2
 
 data = []
 
@@ -52,7 +52,8 @@ for temperature in TEMPERATURE_LIST:
                 simulation.METHOD_LLG,
                 simulation.SOLVER_RK4,
                 single_shot=True,
-                n_iterations_log=100000,
+                n_iterations=2000000 * 60,
+                n_iterations_log=10000000,
             )
 
             while simulation.running_on_image(p_state):
