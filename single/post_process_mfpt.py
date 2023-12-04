@@ -3,16 +3,20 @@ from pathlib import Path
 from scipy.optimize import curve_fit
 
 THIS = Path(__file__).parent
-TRAJECTORY_FOLDER = THIS / "trajectories"
+TRAJECTORY_FOLDER = THIS / "trajectories_damping"
 
 # TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
 TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:]
 
-TEMPERATURE_LIST = [1.0]
+TEMPERATURE_LIST = [2.0]
 
 DAMPING_LIST = [0.3]
+DAMPING_LIST = np.linspace(0.05, 0.6, 20)
 
-order_param = np.linspace(-1, 0.9, 1000)
+
+MIN_SAMPLES = 10
+
+order_param = np.linspace(-1, 0.9, 100)
 
 
 # Calculate the order param from one row of the trajectory file
@@ -53,14 +57,19 @@ for temperature in TEMPERATURE_LIST:
 
                 # Is the current order param higher than the current max?
                 # If yes, we add the time to the passage times array
-
                 if o > omax:
+                    # print()
                     # print(t, o, omax, idx_max_order_param)
+                    # print(order_param_passage_times[idx_traj])
 
                     idx_new_max = np.argmax(order_param > o)
 
                     if idx_new_max == 0:
                         idx_new_max = len(order_param)
+                        order_param_passage_times[idx_traj][
+                            idx_max_order_param:idx_new_max
+                        ] = np.nan
+                        break
 
                     order_param_passage_times[idx_traj][
                         idx_max_order_param:idx_new_max
@@ -68,22 +77,33 @@ for temperature in TEMPERATURE_LIST:
                     idx_max_order_param = idx_new_max
 
                 if o >= np.max(order_param):
+                    # print(order_param_passage_times[idx_traj])
                     break
 
         # Finally, we divide by the number of trajectories to get the mean first passage times
-        mean_passage_times = np.mean(order_param_passage_times, axis=0)
-        std_passage_times = np.std(order_param_passage_times, axis=0) / np.sqrt(
-            n_trajectories
-        )
+        n_order_param = len(order_param)
 
-        # print(mean_passage_times.shape)
-        # print(std_passage_times.shape)
+        mean_passage_times = np.zeros(n_order_param)
+        std_passage_times = np.zeros(n_order_param)
+        n_samples = np.zeros(n_order_param)
+
+        for idx_o in range(n_order_param):
+            times = order_param_passage_times[:, idx_o]
+            n = len(times[~np.isnan(times)])
+            n_samples[idx_o] = n
+            if n == 0:
+                continue
+            mean_passage_times[idx_o] = np.mean(times[~np.isnan(times)])
+            std_passage_times[idx_o] = np.std(times[~np.isnan(times)]) / np.sqrt(n)
+
+        x = order_param[n_samples > MIN_SAMPLES]
+        mean_passage_times = mean_passage_times[n_samples > MIN_SAMPLES]
+        std_passage_times = std_passage_times[n_samples > MIN_SAMPLES]
 
         def sigmoid(x, a, b, c, f):
             y = f * (1.0 + np.exp(-b * (x - a))) ** (-1) + c
             return y
 
-        x = order_param
         y = mean_passage_times
 
         a0 = (x[-1] + x[0]) / 2
@@ -99,9 +119,9 @@ for temperature in TEMPERATURE_LIST:
         with open(temp_folder / "lifetime.txt", "w") as f:
             print(lifetime, file=f)
 
-        # We save teh mean passage times in the same folder we have the trajectories
+        # We save the mean passage times in the same folder we have the trajectories
         np.savetxt(
             temp_folder / "mean_times.txt",
-            np.column_stack((order_param, mean_passage_times, std_passage_times)),
+            np.column_stack((x, mean_passage_times, std_passage_times)),
             header="order_parameter, mean_first_passage_time, error_mean_first_passage_time",
         )

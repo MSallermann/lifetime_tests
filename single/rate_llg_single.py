@@ -6,7 +6,7 @@ N_EVENTS = 60
 THIS = Path(__file__).parent
 INPUT = (THIS / "input.cfg").as_posix()
 INITIAL = (THIS / "initial.ovf").as_posix()
-TRAJ_FOLDER = "trajectories"
+TRAJ_FOLDER = "trajectories_damping"
 
 from spirit import state, io, simulation, system
 from spirit.parameters import llg
@@ -15,10 +15,10 @@ TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:]
 TEMPERATURE_LIST = [2.0]
 
 DAMPING_LIST = np.linspace(0.05, 0.6, 20)
-DAMPING_LIST = [0.3]
+# DAMPING_LIST = [0.3]
 
-N_SHOT = 100
-DT = 1e-2
+N_SHOT = 2
+DT = 0.5e-2
 MAXITER = 2000000 * 60
 ITERATIONS_LOG = 100000
 
@@ -66,10 +66,12 @@ for temperature in TEMPERATURE_LIST:
                     n_iterations_log=ITERATIONS_LOG,
                 )
 
+                t = simulation.get_time(p_state)
+                trajectory.append([0, *spin_directions[0]])
+
                 while simulation.running_on_image(p_state):
                     simulation.n_shot(p_state, N_SHOT)
                     t = simulation.get_time(p_state)
-
                     trajectory.append([t, *spin_directions[0]])
 
                     sz = spin_directions[0][2]

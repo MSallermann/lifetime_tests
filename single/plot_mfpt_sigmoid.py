@@ -10,13 +10,13 @@ def sigmoid(x, a, b, c, f):
 
 
 THIS = Path(__file__).parent
-TRAJECTORY_FOLDER = THIS / "trajectories"
+TRAJECTORY_FOLDER = THIS / "trajectories_damping"
 
 
 TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
-TEMPERATURE_LIST = [2]
+TEMPERATURE_LIST = [2.0]
 
-DAMPING_LIST = [0.3]
+DAMPING_LIST = [0.05, 0.108, 0.6]
 
 order_param = np.linspace(-1, 1, 100)
 order_param_passage_times = np.zeros(len(order_param))
@@ -78,5 +78,6 @@ for temperature in TEMPERATURE_LIST:
 
         plt.xlabel("s_z")
         plt.ylabel("$\\tau$")
-        plt.savefig("sigmoid.png", dpi=300)
+        plt.savefig(f"sigmoid_damping_{damping:.3f}_temperature_{temperature:.3f}.png", dpi=300)
         plt.show()
+        plt.close()

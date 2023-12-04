@@ -1,17 +1,21 @@
 import numpy as np
 from pathlib import Path
-from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
 
 # TRAJECTORY_FOLDER = Path("/home/moritz/Thesis_Code/lifetime_test/single/trajectories")
-TRAJECTORY_FOLDER = Path("/home/moritz/Thesis_Code/lifetime_tests/single/trajectories_2")
+TRAJECTORY_FOLDER = Path(
+    "/home/moritz/Thesis_Code/lifetime_tests/single/trajectories_damping"
+)
 
 
 # TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
 TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:]
 
-# TEMPERATURE_LIST = [3.0]
+DAMPING_LIST = np.linspace(0.05, 0.6, 20)
 
-DAMPING_LIST = [0.3]
+TEMPERATURE_LIST = [2.0]
+
+# DAMPING_LIST = [0.3]
 
 lifetime_list = []
 for temperature in TEMPERATURE_LIST:
@@ -22,4 +26,7 @@ for temperature in TEMPERATURE_LIST:
         lifetime = np.loadtxt(temp_folder / "lifetime.txt")
         lifetime_list.append(lifetime)
 
-    
+plt.plot(DAMPING_LIST, lifetime_list, marker=".")
+# plt.yscale("log")
+plt.savefig("lifetime_vs_damping")
+plt.show()
