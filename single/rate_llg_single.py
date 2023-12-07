@@ -6,7 +6,7 @@ N_EVENTS = 60
 THIS = Path(__file__).parent
 INPUT = (THIS / "input.cfg").as_posix()
 INITIAL = (THIS / "initial.ovf").as_posix()
-TRAJ_FOLDER = "trajectories_damping"
+TRAJ_FOLDER = "trajectories_damping_2"
 
 from spirit import state, io, simulation, system
 from spirit.parameters import llg
@@ -14,7 +14,7 @@ from spirit.parameters import llg
 TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:]
 TEMPERATURE_LIST = [2.0]
 
-DAMPING_LIST = np.linspace(0.05, 0.6, 20)
+DAMPING_LIST = np.linspace(0.6, 2, 40)[1:]
 # DAMPING_LIST = [0.3]
 
 N_SHOT = 2

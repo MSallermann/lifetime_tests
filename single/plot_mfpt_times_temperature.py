@@ -1,6 +1,7 @@
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
+import my_rate
 
 # TRAJECTORY_FOLDER = Path("/home/moritz/Thesis_Code/lifetime_test/single/trajectories")
 TRAJECTORY_FOLDER = Path(
@@ -24,7 +25,10 @@ for temperature in TEMPERATURE_LIST:
         lifetime = np.loadtxt(temp_folder / "lifetime.txt")
         lifetime_list.append(lifetime)
 
-plt.plot(TEMPERATURE_LIST, lifetime_list, marker=".")
+plt.plot(TEMPERATURE_LIST, 2.0 * np.array(lifetime_list), marker=".")
+plt.plot(TEMPERATURE_LIST, 1.0 / my_rate.rate(1.0, TEMPERATURE_LIST, 0.3, 1))
 plt.yscale("log")
+plt.xlabel("Temperature [K]")
+plt.ylabel("Lifetime [ps]")
 plt.savefig("lifetime_vs_temperature")
 plt.show()
