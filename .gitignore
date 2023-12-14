@@ -1,6 +1,8 @@
 *.json
 *.npy
 *.ovf
+*.pyc
 *.png
+*.out
 *.txt
 trajectory*
