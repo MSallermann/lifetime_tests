@@ -3,6 +3,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import my_rate
 from spirit_extras import calculation_folder
+import energy_barrier
 import numpy as np
 
 # TRAJECTORY_FOLDER = Path("/home/moritz/Thesis_Code/lifetime_test/single/trajectories")
@@ -24,18 +25,18 @@ for param_set_folder in TRAJECTORY_FOLDER.glob("*"):
     DAMPING_LIST.append(float(f["damping"]))
     FIELD_LIST.append(float(f["field"]))
 
-    mean_times = np.loadtxt(param_set_folder / "mean_times.txt")
+    mean_times = np.loadtxt(param_set_folder / "mean_times.txt", delimiter=",")
     order_param = mean_times[:, 0]
 
-    idx_min = np.argmin(np.abs(order_param))
+    idx_min = np.argmin(np.abs(order_param - 0.95))
 
     lifetime = mean_times[idx_min, 1]
     std_time = mean_times[idx_min, 2]
     n_sample = mean_times[idx_min, 3]
 
     # lifetime = np.loadtxt(temp_folder / "lifetime.txt")
-    lifetime_list.append(2 * lifetime)
-    err_lifetime_list.append(2 * std_time)
+    lifetime_list.append(lifetime)
+    err_lifetime_list.append(std_time)
 
 
 lifetime_list = np.array(lifetime_list)
@@ -90,6 +91,13 @@ lifetimes_computed = [
     for d in DAMPING_LIST
 ]
 plt.plot(DAMPING_LIST, lifetimes_computed, color="C3", label="zero-mode")
+
+
+neel_time = [
+    energy_barrier.neel_time(damping=d, temperature=TEMPERATURE_LIST[0])
+    for d in DAMPING_LIST
+]
+plt.plot(DAMPING_LIST, neel_time, color="C4", label="neel_time")
 
 
 # plt.yscale("log")

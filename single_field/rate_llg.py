@@ -1,8 +1,8 @@
 import numpy as np
 from pathlib import Path
 from spirit_extras import calculation_folder
-from spirit import state, io, simulation, system, hamiltonian, constants
-from spirit.parameters import llg
+from spirit import state, io, simulation, system, hamiltonian, constants, configuration
+from spirit.parameters import llg, mc
 from spirit_extras import calculation_folder
 import energy_barrier
 
@@ -19,16 +19,16 @@ MAXITER = 2000000 * 60
 ITERATIONS_LOG = 100000
 
 # Temperature runs
-TEMPERATURE_LIST = np.linspace(0.5, 2.3, 20)
-FIELD_LIST = [energy_barrier.max_field(t) for t in TEMPERATURE_LIST]
-DAMPING_LIST = [0.3 for _ in TEMPERATURE_LIST]
-TRAJECTORY_FOLDER_NAME = "trajectories_temperature_max_field"
+# TEMPERATURE_LIST = np.linspace(0.5, 2.3, 20)
+# FIELD_LIST = [energy_barrier.max_field(t) for t in TEMPERATURE_LIST]
+# DAMPING_LIST = [0.3 for _ in TEMPERATURE_LIST]
+# TRAJECTORY_FOLDER_NAME = "trajectories_temperature_max_field"
 
 # Damping runs
-# DAMPING_LIST = np.linspace(0.1, 1.5, 20)
-# TEMPERATURE_LIST = [20.5 for _ in DAMPING_LIST]
-# FIELD_LIST = [0 for _ in DAMPING_LIST]
-# TRAJECTORY_FOLDER_NAME = "trajectories_damping_0T"
+DAMPING_LIST = np.linspace(0.1, 1.5, 20)
+TEMPERATURE_LIST = [2.0 for _ in DAMPING_LIST]
+FIELD_LIST = [0 for _ in DAMPING_LIST]
+TRAJECTORY_FOLDER_NAME = "trajectories_damping_0T_mc"
 
 # Field runs
 # FIELD_LIST = np.linspace(0.0, 20, 10)
@@ -37,6 +37,9 @@ TRAJECTORY_FOLDER_NAME = "trajectories_temperature_max_field"
 # DAMPING_LIST = [0.3 for _ in FIELD_LIST]
 # TRAJECTORY_FOLDER_NAME = "trajectories_field_max_T"
 
+MC_INITIALIZATION = True
+N_ITERATIONS_MC = int(1e6)
+
 data = []
 
 for field, temperature, damping in zip(FIELD_LIST, TEMPERATURE_LIST, DAMPING_LIST):
@@ -44,9 +47,21 @@ for field, temperature, damping in zip(FIELD_LIST, TEMPERATURE_LIST, DAMPING_LIS
     sz = -np.sqrt(1 - sx**2)
     s_min = np.array([sx, 0, sz])
 
-    def reset_to_initial(p_state):
+    def reset_to_initial(p_state, monte_carlo, mc_iterations):
         spins = system.get_spin_directions(p_state)
         spins[0] = s_min
+
+        if monte_carlo:
+            print("Begin MC")
+            mc.set_temperature(p_state, temperature)
+            configuration.add_noise(p_state, 1e-8)
+            simulation.start(
+                p_state, simulation.METHOD_MC, None, n_iterations=mc_iterations
+            )
+            print("End MC")
+
+        if spins[0][2] > 0:
+            spins[0][2] *= -1
 
     # Create a parent folder for all the current trajectories
 
@@ -60,6 +75,9 @@ for field, temperature, damping in zip(FIELD_LIST, TEMPERATURE_LIST, DAMPING_LIS
     trajectory_folder["temperature"] = temperature
     trajectory_folder["damping"] = damping
     trajectory_folder["field"] = field
+    trajectory_folder["mc_initialization"] = MC_INITIALIZATION
+    trajectory_folder["n_iterations_mc"] = N_ITERATIONS_MC
+
     trajectory_folder.to_desc()
 
     life_time_list = []
@@ -88,7 +106,9 @@ for field, temperature, damping in zip(FIELD_LIST, TEMPERATURE_LIST, DAMPING_LIS
             hamiltonian.set_anisotropy(p_state, magnitude=K, direction=[0, 0, 1])
 
             # Always start from the initial image
-            reset_to_initial(p_state)
+            reset_to_initial(
+                p_state, monte_carlo=MC_INITIALIZATION, mc_iterations=N_ITERATIONS_MC
+            )
 
             # pointer to current spin directions
             spin_directions = system.get_spin_directions(p_state)

@@ -17,6 +17,16 @@ def max_T(field, factor=5):
     return delta_e(field) / (factor * constants.k_B)
 
 
+def neel_time(damping, temperature):
+    """neel time in ps"""
+    return (
+        (1 + damping**2)
+        / (2 * damping * constants.gamma)
+        * constants.mu_B
+        / (constants.k_B * temperature)
+    )
+
+
 def max_field(T, factor=5):
     K = 1
     a = 2 * K / constants.mu_B
