@@ -2,8 +2,7 @@ import numpy as np
 from pathlib import Path
 
 from spirit import state, io, simulation, hamiltonian, configuration, constants, system
-import rate
-from spirit_extras import calculation_folder
+from spirit_extras import calculation_folder, rate
 
 THIS = Path(__file__).parent
 INPUT = (THIS / "input.cfg").as_posix()

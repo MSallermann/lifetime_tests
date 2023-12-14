@@ -3,7 +3,7 @@ from pathlib import Path
 from scipy.optimize import curve_fit
 
 THIS = Path(__file__).parent
-TRAJECTORY_FOLDER = THIS / "trajectories_damping"
+TRAJECTORY_FOLDER = THIS / "trajectories_damping_"
 
 # TEMPERATURE_LIST = np.linspace(3.0, 6.6, 10)
 TEMPERATURE_LIST = np.linspace(1.0, 3.8, 10)[:]
