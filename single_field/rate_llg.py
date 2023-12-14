@@ -41,8 +41,8 @@ data = []
 
 for field, temperature, damping in zip(FIELD_LIST, TEMPERATURE_LIST, DAMPING_LIST):
     sx = constants.mu_B * field / (2 * K)
-
-    s_min = np.array([sx, 0, -np.sqrt(1 - sx**2)])
+    sz = -np.sqrt(1 - sx**2)
+    s_min = np.array([sx, 0, sz])
 
     def reset_to_initial(p_state):
         spins = system.get_spin_directions(p_state)
@@ -109,11 +109,12 @@ for field, temperature, damping in zip(FIELD_LIST, TEMPERATURE_LIST, DAMPING_LIS
                 simulation.n_shot(p_state, N_SHOT)
                 t = simulation.get_time(p_state)
 
-                order_parameter = -np.dot(spin_directions[0], s_min)
+                # The order parameter is the spin z component
+                order_parameter = spin_directions[0][2]
                 trajectory.append([t, *spin_directions[0], order_parameter])
 
                 # If a switching event has been detected, we save the trajectory and stop the run
-                if order_parameter > 0.95:
+                if order_parameter > -0.95 * sz:
                     life_time_list.append(t)
                     print(
                         f"Found event {n_switching}/{N_EVENTS} with lifetime {t} ps ( { int((t) / DT) } steps )"
