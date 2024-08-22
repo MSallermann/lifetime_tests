@@ -62,7 +62,8 @@ plt.fill_between(
 plt.plot(TEMPERATURE_LIST, lifetime_list, color="C0", marker=".")
 
 lifetimes_computed = [
-    1.0 / my_rate.htst_rate(field=FIELD_LIST[0], damping=DAMPING_LIST[0], T=T) for T in TEMPERATURE_LIST
+    1.0 / my_rate.htst_rate(field=FIELD_LIST[0], damping=DAMPING_LIST[0], T=T)
+    for T in TEMPERATURE_LIST
 ]
 plt.plot(TEMPERATURE_LIST, lifetimes_computed, color="C1")
 

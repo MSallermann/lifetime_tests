@@ -138,5 +138,3 @@ def tst_rate(field, damping, T):
                 * np.exp(-1 / kbT * E(phi))
             )
         )
-
-    

@@ -27,7 +27,13 @@ for temperature in TEMPERATURE_LIST:
 
 plt.plot(TEMPERATURE_LIST, 2.0 * np.array(lifetime_list), marker=".")
 plt.plot(TEMPERATURE_LIST, 1.0 / my_rate.rate(1.0, TEMPERATURE_LIST, 0.3, 1))
-plt.plot(TEMPERATURE_LIST, 1.0 / my_rate.htst_rate_zero_mode_analytical(0.0, damping=0.3,T=TEMPERATURE_LIST, diffusion=True))
+plt.plot(
+    TEMPERATURE_LIST,
+    1.0
+    / my_rate.htst_rate_zero_mode_analytical(
+        0.0, damping=0.3, T=TEMPERATURE_LIST, diffusion=True
+    ),
+)
 
 plt.yscale("log")
 plt.xlabel("Temperature [K]")

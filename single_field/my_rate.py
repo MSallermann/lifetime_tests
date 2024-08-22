@@ -148,7 +148,9 @@ def htst_rate_analytical(field, damping, T, diffusion=True):
     D = damping * constants.k_B * T * constants.mu_B * MU / constants.gamma
     gamma_prime = constants.gamma / ((1 + damping**2) * constants.mu_B * MU)
 
-    delta_e_expected = K - constants.mu_B * field + 0.25 * (constants.mu_B * field) ** 2 / K
+    delta_e_expected = (
+        K - constants.mu_B * field + 0.25 * (constants.mu_B * field) ** 2 / K
+    )
 
     entropic_factor_expected = (
         np.sqrt(2 * np.pi * constants.k_B * T) ** (-1)
@@ -187,7 +189,9 @@ def tst_rate_analytical(field, damping, T, diffusion=True):
     D = damping * constants.k_B * T * constants.mu_B * MU / constants.gamma
     gamma_prime = constants.gamma / ((1 + damping**2) * constants.mu_B * MU)
 
-    delta_e_expected = K - constants.mu_B * field + 0.25 * (constants.mu_B * field) ** 2 / K
+    delta_e_expected = (
+        K - constants.mu_B * field + 0.25 * (constants.mu_B * field) ** 2 / K
+    )
 
     entropic_factor_expected = (
         np.sqrt(2 * np.pi * constants.k_B * T) ** (-1)
@@ -346,6 +350,7 @@ def tst_rate(field, damping, T):
     rate = Z_TS / Z_MIN * dyn_contribution
 
     return rate
+
 
 if __name__ == "__main__":
 

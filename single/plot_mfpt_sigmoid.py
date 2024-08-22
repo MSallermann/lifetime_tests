@@ -78,6 +78,8 @@ for temperature in TEMPERATURE_LIST:
 
         plt.xlabel("s_z")
         plt.ylabel("$\\tau$")
-        plt.savefig(f"sigmoid_damping_{damping:.3f}_temperature_{temperature:.3f}.png", dpi=300)
+        plt.savefig(
+            f"sigmoid_damping_{damping:.3f}_temperature_{temperature:.3f}.png", dpi=300
+        )
         plt.show()
         plt.close()
