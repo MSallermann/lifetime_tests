@@ -6,3 +6,10 @@
 *.out
 *.txt
 trajectory*
+workflow*/git*
+workflow*/envs*
+workflow*/results*
+workflow*/.snakemake
+
+
+
