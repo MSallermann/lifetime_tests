@@ -1,19 +1,33 @@
-# rule all:
 from pathlib import Path
+import numpy as np
+
+temperatures = np.linspace(2.0, 6.6, 10)
+SAMPLES = [f"temperature_{t:.2e}" for t in temperatures]
+
+sample_to_temperature = {f"temperature_{t:.2e}": t for t in temperatures for t in temperatures}
+
+results_path = "results/{sample}"
+
+rule all:
+    input:
+        expand(f"{results_path}/trajectories", sample=SAMPLES ),
+        expand(f"{results_path}/mfpt.png", sample=SAMPLES )
+
 
 rule trajectories:
     input: 
         system = "data/system.json",
+        params = "data/rate_llg.json",
         initial = "data/initial.ovf"
-    output:
-        trajectories = directory("results/trajectories")
     params:
-        temperature = 5.0,
-        damping = 0.0,
-        n_events = 10,
-        s_z = 0.95
-    shell:"""
-    python3 scripts/rate_single.py --system {input.system} -o {output.trajectories} -i {input.initial} --n_events {params.n_events} --temp {params.temperature} --sz {params.s_z}
+        temperature = lambda wc : sample_to_temperature[wc.sample],
+        damping = 0.3,
+        n_proc = 3,
+        n_events = 10
+    threads: 1
+    output: trajectories = directory(f"{results_path}/trajectories")
+    shell: """
+    python3 scripts/rate_single.py --system {input.system} -o {output.trajectories} -i {input.initial} --n_events {params.n_events} --temp {params.temperature}
     """
 
 mfpt_src_dir = "git/mfpt_processor"
@@ -45,10 +59,19 @@ rule run_mfpt:
         trajectories = rules.trajectories.output.trajectories,
         mfpt = rules.build_mfpt.output
     output:
-        "results/mfpt.txt"
+        f"{results_path}/mfpt.txt"
     params:
         n_disc = 100,
         min_samples = 10
     shell:"""
     {input.mfpt} {input.trajectories} --n_disc {params.n_disc} --min_samples {params.min_samples} -o {output}
+    """
+
+rule plot_sigmoid:
+    input:
+        mfpt = rules.run_mfpt.output
+    output:
+        f"{results_path}/mfpt.png"
+    shell:"""
+    python scripts/plot_mfpt.py --mfpt {input.mfpt} -o {output}
     """

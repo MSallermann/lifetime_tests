@@ -4,17 +4,23 @@ from spirit import system
 from pathlib import Path
 
 
+def has_switched(p_state, params):
+    spins = system.get_spin_directions(p_state)
+    return spins[0][2] > 0.95
+
+
 def main(
     hamiltonian: HamiltonianParameters,
     params: rate_llg.MethodParameters,
     sz: float,
+    n_proc: int = 1,
 ):
-
-    def has_switched(p_state, params):
-        spins = system.get_spin_directions(p_state)
-        return spins[0][2] > sz
-
-    rate_llg.run(hamiltonian=hamiltonian, params=params, has_switched=has_switched)
+    rate_llg.run(
+        hamiltonian=hamiltonian,
+        params=params,
+        has_switched=has_switched,
+        n_processes=n_proc,
+    )
 
 
 if __name__ == "__main__":
@@ -84,6 +90,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--n_proc",
+        default=1,
+        required=False,
+        type=int,
+        help="number of processes to use for sampling",
+    )
+
+    parser.add_argument(
         "--field_x",
         default=None,
         required=False,
@@ -122,4 +136,4 @@ if __name__ == "__main__":
 
     output_file = args.output
 
-    main(parameters_hamiltonian, parameters_method, args.sz)
+    main(parameters_hamiltonian, parameters_method, args.sz, args.n_proc)
