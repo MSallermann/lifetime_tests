@@ -1,0 +1,54 @@
+# rule all:
+from pathlib import Path
+
+rule trajectories:
+    input: 
+        system = "data/system.json",
+        initial = "data/initial.ovf"
+    output:
+        trajectories = directory("results/trajectories")
+    params:
+        temperature = 5.0,
+        damping = 0.0,
+        n_events = 10,
+        s_z = 0.95
+    shell:"""
+    python3 scripts/rate_single.py --system {input.system} -o {output.trajectories} -i {input.initial} --n_events {params.n_events} --temp {params.temperature} --sz {params.s_z}
+    """
+
+mfpt_src_dir = "git/mfpt_processor"
+
+rule clone_mfpt:
+    output:
+        directory(mfpt_src_dir)
+    shell:"""
+        rm -rf {output}
+        git clone git@github.com:MSallermann/mfpt_post_processor.git {output} --depth 1 
+    """
+
+rule build_mfpt:
+    input:
+        mfpt_src_dir
+    output:
+        mfpt_bin = f"bin/mfpt"
+    shell: """
+    micromamba create -f {mfpt_src_dir}/environment.yml -r envs -n mfpt_env -y
+    pushd {mfpt_src_dir}
+    micromamba run -n mfpt_env meson setup build
+    micromamba run -n mfpt_env meson compile -C build
+    popd
+    cp {mfpt_src_dir}/build/mfpt_processor {output.mfpt_bin}
+    """
+
+rule run_mfpt:
+    input:
+        trajectories = rules.trajectories.output.trajectories,
+        mfpt = rules.build_mfpt.output
+    output:
+        "results/mfpt.txt"
+    params:
+        n_disc = 100,
+        min_samples = 10
+    shell:"""
+    {input.mfpt} {input.trajectories} --n_disc {params.n_disc} --min_samples {params.min_samples} -o {output}
+    """
