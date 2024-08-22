@@ -22,12 +22,12 @@ rule trajectories:
     params:
         temperature = lambda wc : sample_to_temperature[wc.sample],
         damping = 0.3,
-        n_proc = 3,
         n_events = 10
     threads: 1
     output: trajectories = directory(f"{results_path}/trajectories")
     shell: """
-    python3 scripts/rate_single.py --system {input.system} -o {output.trajectories} -i {input.initial} --n_events {params.n_events} --temp {params.temperature}
+    export OMP_NUM_THREADS=1
+    python3 scripts/rate_single.py --system {input.system} -o {output.trajectories} -i {input.initial} --n_events {params.n_events} --temp {params.temperature} --n_proc {threads}
     """
 
 mfpt_src_dir = "git/mfpt_processor"
