@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 
-temperatures = np.linspace(2.0, 6.6, 10)
+temperatures = np.linspace(2.0, 3.0, 10)
 SAMPLES = [f"temperature_{t:.2e}" for t in temperatures]
 
 sample_to_temperature = {f"temperature_{t:.2e}": t for t in temperatures for t in temperatures}
@@ -11,8 +11,8 @@ results_path = "results/{sample}"
 rule all:
     input:
         expand(f"{results_path}/trajectories", sample=SAMPLES ),
-        expand(f"{results_path}/mfpt.png", sample=SAMPLES )
-
+        expand(f"{results_path}/mfpt_lifetime.json", sample=SAMPLES ),
+        f"results/lifetime_vs_temp.csv"
 
 rule trajectories:
     input: 
@@ -23,7 +23,7 @@ rule trajectories:
         temperature = lambda wc : sample_to_temperature[wc.sample],
         damping = 0.3,
         n_events = 10
-    threads: 1
+    threads: 4
     output: trajectories = directory(f"{results_path}/trajectories")
     shell: """
     export OMP_NUM_THREADS=1
@@ -62,16 +62,28 @@ rule run_mfpt:
         f"{results_path}/mfpt.txt"
     params:
         n_disc = 100,
-        min_samples = 10
+        min_samples = 5
     shell:"""
     {input.mfpt} {input.trajectories} --n_disc {params.n_disc} --min_samples {params.min_samples} -o {output}
     """
 
-rule plot_sigmoid:
+rule fit_sigmoid:
     input:
         mfpt = rules.run_mfpt.output
     output:
-        f"{results_path}/mfpt.png"
+        res = f"{results_path}/mfpt_lifetime.json",
+        plot = f"{results_path}/sigmoid.png"
     shell:"""
-    python scripts/plot_mfpt.py --mfpt {input.mfpt} -o {output}
+    python scripts/lifetime_from_mfpt.py --mfpt {input.mfpt} -o {output.res} --plot_path {output.plot}
+    """
+
+rule aggregate_mfpt:
+    input:
+        mfpts = expand(rules.fit_sigmoid.output.res, sample=SAMPLES)
+    output:
+        f"results/lifetime_vs_temp.csv"
+    params:
+        temps = " ".join(map(str, temperatures))
+    shell:"""
+    python scripts/aggregate_lifetimes.py --mfpts {input.mfpts} --temps {params.temps} -o {output}
     """
